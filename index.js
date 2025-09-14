@@ -11,6 +11,7 @@ function mainMenu(ctx, replace = false) {
     [Markup.button.callback('近7日邮件汇总', 'week_report')],
     [Markup.button.callback('数据库用量统计', 'db_report')],
     [Markup.button.callback('删除历史邮件', 'delete_email')],
+    [Markup.button.callback('检查服务状态', 'check_status')],
   ]);
   if (replace) {
     ctx.editMessageText(title, extra);
@@ -174,6 +175,32 @@ bot.action('main_menu', (ctx) => {
   mainMenu(ctx, true);
 });
 
+bot.action('check_status', async (ctx) => {
+  const msg = await ctx.reply('正在检查服务状态...');
+  const mid = msg.message_id;
+  try {
+    const result = await fetch(
+      `${process.env.API_BASE_URL}/console/status/check`,
+      {
+        headers: {
+          'x-internal-auth': process.env.API_SECRET,
+        },
+      },
+    );
+    if (!result.ok) {
+      throw new Error('🆘服务不可用');
+    }
+    await ctx.telegram.editMessageText(
+      ctx.chat.id,
+      mid,
+      null,
+      '✅服务运行正常',
+    );
+  } catch (e) {
+    await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
+  }
+});
+
 // 捕获任何其他文本消息，只对管理员可见
 bot.on('text', (ctx) => {
   ctx.reply('请使用/start命令开始');
@@ -181,7 +208,7 @@ bot.on('text', (ctx) => {
 
 // --- 启动 Bot ---
 // 长轮询，适合主机托管
-//bot.launch();
+// bot.launch();
 
 // webhook，适合无服务托管
 module.exports = bot.webhookCallback('/');
