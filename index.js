@@ -180,8 +180,12 @@ bot.on('text', (ctx) => {
 });
 
 // --- 启动 Bot ---
-bot.launch();
+// 长轮询，适合主机托管
+//bot.launch();
 
-// 确保程序在接收到终止信号时能优雅地退出
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+// webhook，适合无服务托管
+module.exports = bot.webhookCallback('/');
+
+// 确保程序在接收到终止信号时能优雅地退出，仅长轮询模式
+// process.once('SIGINT', () => bot.stop('SIGINT'));
+// process.once('SIGTERM', () => bot.stop('SIGTERM'));
