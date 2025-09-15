@@ -90,8 +90,8 @@ bot.action('week_report', async (ctx) => {
     const title = '近7日邮件汇总\n\n';
 
     const table = makeTable([
-      ['Date', 'Total'],
-      ...data.map((row) => [row.day, row.total]),
+      ['Date', 'Total', 'MOM'],
+      ...data.map((row) => [row.day, row.total, row.mom]),
     ]);
 
     const text = title + table;
