@@ -22,7 +22,7 @@ bot.use(async (ctx, next) => {
 
 bot.start((ctx) => {
   ctx.reply(
-    `👋Hi，${ctx.from.first_name} \n\n🤖欢迎使用 Temporam Console Bot \n\n🪄输入 /start 开始`,
+    `👋Hi，${ctx.from.first_name} \n\n🤖 欢迎使用 Temporam Console Bot \n\n🪄 输入 /start 开始`,
     Markup.keyboard([
       ['🎉 每日邮件汇报'],
       ['📊 近7日邮件汇总'],
@@ -56,18 +56,22 @@ bot.hears('🎉 每日邮件汇报', async (ctx) => {
 
     const data = await result.json();
 
-    const title = '今日实时数据汇总\n\n';
-
     const table = makeTable([
       ['Metric', 'Value'],
       ...data.map((row) => [row.metric, row.value]),
     ]);
 
-    const text = title + table;
-
-    await ctx.telegram.editMessageText(ctx.chat.id, mid, null, text, {
-      parse_mode: 'HTML',
-    });
+    await ctx.telegram.editMessageText(
+      ctx.chat.id,
+      mid,
+      null,
+      '今日实时数据汇总',
+      {
+        reply_markup: {
+          inline_keyboard: table,
+        },
+      },
+    );
   } catch (e) {
     await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
   }
@@ -92,18 +96,22 @@ bot.hears('📊 近7日邮件汇总', async (ctx) => {
 
     const data = await result.json();
 
-    const title = '近7日邮件汇总\n\n';
-
     const table = makeTable([
       ['Date', 'Total', 'MOM'],
       ...data.map((row) => [row.day, row.total, row.mom]),
     ]);
 
-    const text = title + table;
-
-    await ctx.telegram.editMessageText(ctx.chat.id, mid, null, text, {
-      parse_mode: 'HTML',
-    });
+    await ctx.telegram.editMessageText(
+      ctx.chat.id,
+      mid,
+      null,
+      '近7日邮件汇总',
+      {
+        reply_markup: {
+          inline_keyboard: table,
+        },
+      },
+    );
   } catch (e) {
     await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
   }
@@ -128,18 +136,22 @@ bot.hears('💾 数据库用量统计', async (ctx) => {
 
     const data = await result.json();
 
-    const title = `数据库用量统计\n\n`;
-
     const table = makeTable([
       ['Name', 'Size'],
       ...data.map((item) => [item.datname, item.size]),
     ]);
 
-    const text = title + table;
-
-    await ctx.telegram.editMessageText(ctx.chat.id, mid, null, text, {
-      parse_mode: 'HTML',
-    });
+    await ctx.telegram.editMessageText(
+      ctx.chat.id,
+      mid,
+      null,
+      '数据库用量统计',
+      {
+        reply_markup: {
+          inline_keyboard: table,
+        },
+      },
+    );
   } catch (e) {
     await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
   }
@@ -204,6 +216,8 @@ bot.hears('✅ 检查服务状态', async (ctx) => {
     await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
   }
 });
+
+bot.action('noop', (ctx) => ctx.answerCbQuery());
 
 // --- 启动 Bot ---
 if (isDev) {
