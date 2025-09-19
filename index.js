@@ -4,6 +4,14 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+const isDev = process.env.NODE_ENV !== 'production';
+
+console.log(isDev);
+
+if (!isDev) {
+  bot.telegram.setWebhook(process.env.WEBHOOK_URL);
+}
+
 bot.use(async (ctx, next) => {
   if (ctx.from && ctx.from.id.toString() === process.env.ADMIN_ID) {
     return next();
@@ -198,12 +206,13 @@ bot.hears('✅ 检查服务状态', async (ctx) => {
 });
 
 // --- 启动 Bot ---
-// 长轮询，适合主机托管
-// bot.launch();
-
-// webhook，适合无服务托管
-module.exports = bot.webhookCallback('/');
-
-// 确保程序在接收到终止信号时能优雅地退出，仅长轮询模式
-// process.once('SIGINT', () => bot.stop('SIGINT'));
-// process.once('SIGTERM', () => bot.stop('SIGTERM'));
+if (isDev) {
+  // 长轮询，适合主机托管
+  bot.launch();
+  // 确保程序在接收到终止信号时能优雅地退出，仅长轮询模式
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+} else {
+  // webhook，适合无服务托管
+  module.exports = bot.webhookCallback('/');
+}
