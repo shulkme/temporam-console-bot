@@ -6,7 +6,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const isDev = process.env.NODE_ENV !== 'production';
 
-console.log(isDev);
+console.log('NODE_ENV:', process.env.NODE_ENV);
 
 if (!isDev) {
   bot.telegram.setWebhook(process.env.WEBHOOK_URL);
