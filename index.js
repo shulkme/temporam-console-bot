@@ -4,22 +4,6 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-function mainMenu(ctx, replace = false) {
-  const title = `👋你好，${ctx.from.first_name} \n\n 🤖欢迎使用Temporam Console`;
-  const extra = Markup.inlineKeyboard([
-    [Markup.button.callback('每日邮件汇报', 'today_report')],
-    [Markup.button.callback('近7日邮件汇总', 'week_report')],
-    [Markup.button.callback('数据库用量统计', 'db_report')],
-    [Markup.button.callback('删除历史邮件', 'delete_email')],
-    [Markup.button.callback('检查服务状态', 'check_status')],
-  ]);
-  if (replace) {
-    ctx.editMessageText(title, extra);
-  } else {
-    ctx.reply(title, extra);
-  }
-}
-
 bot.use(async (ctx, next) => {
   if (ctx.from && ctx.from.id.toString() === process.env.ADMIN_ID) {
     return next();
@@ -29,10 +13,23 @@ bot.use(async (ctx, next) => {
 });
 
 bot.start((ctx) => {
-  mainMenu(ctx);
+  ctx.reply(
+    '欢迎使用',
+    Markup.keyboard([
+      ['🎉 每日邮件汇报'],
+      ['📊 近7日邮件汇总'],
+      ['💾 数据库用量统计'],
+      ['🗑️ 删除历史邮件'],
+      ['✅ 检查服务状态'],
+    ]),
+    {
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    },
+  );
 });
 
-bot.action('today_report', async (ctx) => {
+bot.hears('🎉 每日邮件汇报', async (ctx) => {
   const msg = await ctx.reply('正在生成统计数据...');
   const mid = msg.message_id;
 
@@ -68,7 +65,7 @@ bot.action('today_report', async (ctx) => {
   }
 });
 
-bot.action('week_report', async (ctx) => {
+bot.hears('📊 近7日邮件汇总', async (ctx) => {
   const msg = await ctx.reply('正在生成统计数据...');
   const mid = msg.message_id;
 
@@ -104,7 +101,7 @@ bot.action('week_report', async (ctx) => {
   }
 });
 
-bot.action('db_report', async (ctx) => {
+bot.hears('💾 数据库用量统计', async (ctx) => {
   const msg = await ctx.reply('正在生成统计数据...');
   const mid = msg.message_id;
 
@@ -140,7 +137,7 @@ bot.action('db_report', async (ctx) => {
   }
 });
 
-bot.action('delete_email', async (ctx) => {
+bot.hears('🗑️ 删除历史邮件', async (ctx) => {
   await ctx.reply(
     '⚠️确定要删除历史数据吗？',
     Markup.inlineKeyboard([
@@ -170,12 +167,11 @@ bot.action('complete_delete_email', async (ctx) => {
     await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
   }
 });
-
 bot.action('main_menu', (ctx) => {
-  mainMenu(ctx, true);
+  ctx.deleteMessage();
 });
 
-bot.action('check_status', async (ctx) => {
+bot.hears('✅ 检查服务状态', async (ctx) => {
   const msg = await ctx.reply('正在检查服务状态...');
   const mid = msg.message_id;
   try {
@@ -199,11 +195,6 @@ bot.action('check_status', async (ctx) => {
   } catch (e) {
     await ctx.telegram.editMessageText(ctx.chat.id, mid, null, e.message);
   }
-});
-
-// 捕获任何其他文本消息，只对管理员可见
-bot.on('text', (ctx) => {
-  ctx.reply('请使用/start命令开始');
 });
 
 // --- 启动 Bot ---
