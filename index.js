@@ -22,7 +22,7 @@ bot.use(async (ctx, next) => {
 
 bot.start((ctx) => {
   ctx.reply(
-    '欢迎使用',
+    `👋Hi，${ctx.from.first_name} \n\n🤖欢迎使用 Temporam Console Bot \n\n🪄输入 /start 开始`,
     Markup.keyboard([
       ['🎉 每日邮件汇报'],
       ['📊 近7日邮件汇总'],
